@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"crypto/rand"
 	"fmt"
+	amf "github.com/speps/go-amf"
 	"io"
 	"log"
 	"net"
@@ -45,6 +47,36 @@ func handleConnection(conn net.Conn) {
 	}
 
 	log.Println("Handshake Successful")
+
+	reader := bufio.NewReader(conn)
+
+	for {
+
+		data, err := reader.ReadBytes('\n')
+		if err != nil {
+			log.Fatalf("error reading data after handshake: %s", err)
+		}
+
+		decoded, err := amf.DecodeAMF0(data)
+		if err != nil {
+			log.Fatalf("Error decoding AMF: %s", err)
+		}
+
+		fmt.Println(decoded)
+
+		/*	log.Println(data)
+			log.Println(data[0] == 0x02)
+			parsedStr := ""
+			if data[0] == 0x02 {
+				for _, d := range data[1:] {
+					parsedStr += string(d)
+				}
+				log.Println(parsedStr)
+
+			}
+		*/
+	}
+
 }
 
 func performHandshake(conn net.Conn) error {
